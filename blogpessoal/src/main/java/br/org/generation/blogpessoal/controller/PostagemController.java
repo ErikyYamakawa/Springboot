@@ -1,6 +1,7 @@
 package br.org.generation.blogpessoal.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.org.generation.blogpessoal.model.Postagem;
 import br.org.generation.blogpessoal.repository.PostagemRepository;
@@ -55,12 +58,29 @@ public class PostagemController {
 	}
 	@PutMapping
 	public ResponseEntity <Postagem> putPostagem(@Valid @RequestBody Postagem postagem){	
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(postagemRepository.save(postagem));
-				
+		return postagemRepository.findById(postagem.getId())
+				.map(resposta->ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem)))
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 	}
 	
-	@DeleteMapping("/{id}")
-	public void deletePostagem(@PathVariable Long id) {
+	/*@DeleteMapping("/{id}")
+	public ResponseEntity<?> delete(@PathVariable Long id) {
+		return postagemRepository.findById(id)
+				.map(resposta->{
+					postagemRepository.deleteById(id);
+					return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+				}).orElse(ResponseEntity.notFound().build());
+	}*/	
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@DeleteMapping("{id}")
+	public void deletePostagem (@PathVariable Long id) {
+		Optional<Postagem> postagem= postagemRepository.findById(id);
+		
+		if(postagem.isEmpty())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		
 		postagemRepository.deleteById(id);
+		
+		
 	}
 }
