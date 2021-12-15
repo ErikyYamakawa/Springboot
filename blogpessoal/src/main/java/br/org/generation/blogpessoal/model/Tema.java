@@ -28,6 +28,17 @@ public class Tema {
 	
 	private List<Postagem>postagem;
 	
+	
+	
+	public Tema(Long id,String descricao) {
+		this.id = id;
+		this.descricao = descricao;
+	}
+		
+		
+		public Tema() { }
+		
+		
 	public Long getId() {
 		return id;
 	}
